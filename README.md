@@ -48,22 +48,3 @@ No API interaction — **CSV only**.
 * Source code
 * Documentation
 * Example/fake CSVs
-
-### What will *never* be published:
-* Real bank or financial data
-* Sensitive personal information
-
-### Security Principles
-* Runs **only on local machine**
-* No servers, no online access
-* No API tokens, OAuth, or certificates
-* CSV import is the only input method
-* No financial data leaves the device
-
-## Technology
-* **Python**
-* Pandas for data processing
-* Matplotlib / Plotly for charts
-* Jinja2 for HTML templates
-* ReportLab or WeasyPrint for PDF output
-* Optional: Dash / Streamlit for interactive mode
