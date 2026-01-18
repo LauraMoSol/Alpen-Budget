@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpen Budget - Personal Expense Tracker</title>
+<style>
+    body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin:0; padding:0; }
+    header { background-color: #4CAF50; color:white; padding:20px; text-align:center; }
+    main { padding:20px; display:flex; flex-direction:column; gap:20px; }
+    .section { background:white; border-radius:8px; padding:20px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    table, th, td { border:1px solid #ccc; }
+    th, td { padding:8px; text-align:left; }
+    .chart-container { width:100%; height:300px; margin-bottom:20px; }
+    footer { text-align:center; padding:15px; background:#4CAF50; color:white; margin-top:40px; }
+    .file-input { margin-bottom: 15px; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Alpen Budget - Personal Expense Tracker</h1>
+    <p>Offline HTML report generator</p>
+</header>
+
+<main>
+    <div class="section">
+        <h2>Upload CSV File(s)</h2>
+        <input type="file" id="csvFiles" class="file-input" multiple accept=".csv">
+        <button onclick="processFiles()">Generate Reports</button>
+    </div>
+
+    <div class="section" id="summarySection">
+        <h2>Summary</h2>
+        <canvas id="pieChart" class="chart-container"></canvas>
+        <table id="summaryTable">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Spent (CHF)</th>
+                    <th>Budget (CHF)</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="section" id="timeReports">
+        <h2>Time-based Reports</h2>
+        <label for="timeFilter">View by:</label>
+        <select id="timeFilter" onchange="updateTimeChart()">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month" selected>Month</option>
+            <option value="year">Year</option>
+        </select>
+        <canvas id="barChart" class="chart-container"></canvas>
+    </div>
+
+    <div class="section" id="transactionsSection">
+        <h2>Transactions</h2>
+        <table id="transactionsTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Booking Text</th>
+                    <th>Reference</th>
+                    <th>Debit (CHF)</th>
+                    <th>Credit (CHF)</th>
+                    <th>Balance (CHF)</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</main>
+
+<footer>
+    &copy; 2026 Alpen Budget – Offline Reports
+</footer>
+
+<!-- Chart.js CDN for charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script>
+let transactions = [];
+let categoryBudgets = {
+    "Housing": 1200, "Groceries": 350, "Utilities": 200, "Entertainment": 150,
+    "Transport": 100, "Health": 100, "Miscellaneous": 50
+};
+
+function processFiles() {
+    const files = document.getElementById('csvFiles').files;
+    if(files.length === 0) { alert('Please select CSV file(s)'); return; }
+
+    transactions = [];
+    let filesProcessed = 0;
+
+    for(let file of files){
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results){
+                transactions.push(...results.data.map(row => ({
+                    date: new Date(row.Date),
+                    booking: row["Booking Text"],
+                    reference: row.Reference,
+                    debit: parseFloat(row.Debit || 0),
+                    credit: parseFloat(row.Credit || 0),
+                    balance: parseFloat(row.Balance || 0),
+                    category: row.Category
+                })));
+                filesProcessed++;
+                if(filesProcessed === files.length) {
+                    renderReports();
+                }
+            }
+        });
+    }
+}
+
+function renderReports() {
+    renderTransactions();
+    renderSummary();
+    renderPieChart();
+    renderBarChart();
+}
+
+function renderTransactions() {
+    const tbody = document.querySelector("#transactionsTable tbody");
+    tbody.innerHTML = "";
+    transactions.sort((a,b) => a.date - b.date).forEach(t => {
+        let row = document.createElement('tr');
+        row.innerHTML = `<td>${t.date.toISOString().split('T')[0]}</td>
+                         <td>${t.booking}</td>
+                         <td>${t.reference}</td>
+                         <td>${t.debit}</td>
+                         <td>${t.credit}</td>
+                         <td>${t.balance}</td>
+                         <td>${t.category}</td>`;
+        tbody.appendChild(row);
+    });
+}
+
+function renderSummary() {
+    const summary = {};
+    transactions.forEach(t => {
+        if(!summary[t.category]) summary[t.category] = 0;
+        summary[t.category] += t.debit;
+    });
+
+    const tbody = document.querySelector("#summaryTable tbody");
+    tbody.innerHTML = "";
+    for(let cat in summary){
+        let spent = summary[cat];
+        let budget = categoryBudgets[cat] || 0;
+        let status = spent > budget ? `<span style="color:red">Over</span>` : `<span style="color:green">OK</span>`;
+        let row = document.createElement('tr');
+        row.innerHTML = `<td>${cat}</td><td>${spent.toFixed(2)}</td><td>${budget}</td><td>${status}</td>`;
+        tbody.appendChild(row);
+    }
+}
+
+let pieChart, barChart;
+
+function renderPieChart() {
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    const summary = {};
+    transactions.forEach(t => {
+        if(!summary[t.category]) summary[t.category] = 0;
+        summary[t.category] += t.debit;
+    });
+
+    if(pieChart) pieChart.destroy();
+    pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(summary),
+            datasets: [{
+                data: Object.values(summary),
+                backgroundColor: Object.values(summary).map(v => `hsl(${Math.random()*360},70%,70%)`)
+            }]
+        }
+    });
+}
+
+function renderBarChart(filter="month") {
+    const ctx = document.getElementById('barChart').getContext('2d');
+
+    let grouped = {};
+    transactions.forEach(t => {
+        let key;
+        if(filter==="day") key = t.date.toISOString().split('T')[0];
+        else if(filter==="week") {
+            let d = new Date(t.date);
+            let onejan = new Date(d.getFullYear(),0,1);
+            key = d.getFullYear() + "-W" + Math.ceil((((d - onejan) / 86400000 + onejan.getDay()+1)/7));
+        } else if(filter==="month") key = `${t.date.getFullYear()}-${t.date.getMonth()+1}`;
+        else key = `${t.date.getFullYear()}`;
+        if(!grouped[key]) grouped[key] = 0;
+        grouped[key] += t.debit;
+    });
+
+    const labels = Object.keys(grouped).sort();
+    const data = Object.values(grouped);
+
+    if(barChart) barChart.destroy();
+    barChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Spending',
+                data: data,
+                backgroundColor: data.map(v => v > 1000 ? 'red' : 'green') // example threshold
+            }]
+        },
+        options: {
+            responsive:true,
+            plugins:{legend:{display:false}}
+        }
+    });
+}
+
+function updateTimeChart() {
+    const filter = document.getElementById('timeFilter').value;
+    renderBarChart(filter);
+}
+</script>
+
+</body>
+</html>
