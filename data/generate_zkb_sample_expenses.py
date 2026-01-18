@@ -15,6 +15,10 @@ def random_date_in_month(year, month):
 def generate_reference(num_digits=10):
     return ''.join(str(random.randint(0, 9)) for _ in range(num_digits))
 
+def generate_zkb_reference():
+    """Generate a ZKB reference in format ZKB/XXXXXXXX (8 hex characters)."""
+    return 'ZKB/' + ''.join(random.choice('0123456789ABCDEF') for _ in range(8))
+
 def random_balance_change(balance, debit, credit):
     return balance - debit + credit
 
@@ -101,8 +105,8 @@ def generate_transactions(year, month, num_transactions=60):
     transactions.append({
         "Date": salary_date,
         "Booking text": "Monthly Salary Payment",
-        "ZKB reference": generate_reference(),
-        "Reference number": generate_reference(6),
+        "ZKB reference": generate_zkb_reference(),
+        "Reference number": generate_reference(10),
         "Debit CHF": "",
         "Credit CHF": salary_amount,
         "Value date": salary_date,
@@ -116,8 +120,8 @@ def generate_transactions(year, month, num_transactions=60):
     transactions.append({
         "Date": rent_date,
         "Booking text": "Rent payment to Wohnungsverwaltung Zürich",
-        "ZKB reference": generate_reference(),
-        "Reference number": generate_reference(6),
+        "ZKB reference": generate_zkb_reference(),
+        "Reference number": generate_reference(10),
         "Debit CHF": rent_amount,
         "Credit CHF": "",
         "Value date": rent_date,
@@ -143,8 +147,8 @@ def generate_transactions(year, month, num_transactions=60):
         transactions.append({
             "Date": date,
             "Booking text": booking_text,
-            "ZKB reference": generate_reference(),
-            "Reference number": generate_reference(6),
+            "ZKB reference": generate_zkb_reference(),
+            "Reference number": generate_reference(10),
             "Debit CHF": debit,
             "Credit CHF": credit,
             "Value date": date,
@@ -166,20 +170,20 @@ def save_csv(transactions, filename):
         filename += ".csv"
 
     with open(filename, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f, delimiter="\t")
+        writer = csv.writer(f, delimiter=",", quoting=csv.QUOTE_MINIMAL)
         writer.writerow([
             "Date", "Booking text", "ZKB reference", "Reference number",
             "Debit CHF", "Credit CHF", "Value date", "Balance CHF"
         ])
         for t in transactions:
             writer.writerow([
-                t["Date"],
+                t["Date"].strftime("%d.%m.%Y"),  # Format date as DD.MM.YYYY
                 t["Booking text"],
                 t["ZKB reference"],
                 t["Reference number"],
-                t["Debit CHF"],
-                t["Credit CHF"],
-                t["Value date"],
+                t["Debit CHF"] if t["Debit CHF"] else "",
+                t["Credit CHF"] if t["Credit CHF"] else "",
+                t["Value date"].strftime("%d.%m.%Y"),  # Format date as DD.MM.YYYY
                 t["Balance CHF"]
             ])
     print(f"\nCSV saved to: {os.path.abspath(filename)}")
