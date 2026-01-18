@@ -12,12 +12,12 @@ This project provides a **local, secure tool** for:
 
 ## Current Strategy
 ### Phase 1 — Static Report Generator (MVP)
-A local Python script that:
-1. Reads a CSV file (or multiple files in a folder).
-2. Categorizes transactions based on:
+A local script that:
+1. Step 1: Reads a CSV file (or multiple files in a folder).
+2. Step 2: Categorizes transactions based on:
    * Predefined rules
    * User-created categories & subcategories
-3. Outputs **static HTML reports**, including:
+3. Step 3: Outputs **static HTML reports**, including:
    * Category breakdowns
    * Pie charts
    * Bar charts showing whether spending goals were met
@@ -28,7 +28,10 @@ A local Python script that:
    * Summaries & insights
 Everything runs **offline** for perfect data security.
 
-## Supported Data Format
+## How to Use:
+1. Run python script in data folder: Step_1_generate_zkb_sample_expenses.py
+2. Run python script in data folder: Step_2_categorized_zkb_sample_expenses.py
+3. Use html script in frontend folder: Step_3_analytics_and_reporting.html
 
 ### ZKB CSV (initial focus)
 ```
