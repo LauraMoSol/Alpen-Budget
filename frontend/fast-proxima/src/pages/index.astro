@@ -1,6 +1,7 @@
 ---
-import CSVUpload from '../components/CSVUpload.jsx';
-import GraphCarousel from '../components/GraphCarousel.jsx';
+import '../styles/global.css';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import ReportSection from '../components/ReportSection.jsx';
 ---
 
 <html lang="en">
@@ -8,23 +9,38 @@ import GraphCarousel from '../components/GraphCarousel.jsx';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alpen Budget - Personal Expense Tracker</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
   </head>
-  <body class="bg-gray-900 text-gray-100 font-sans">
-    <!-- Landing Section -->
-    <section id="landing" class="flex flex-col items-center justify-center min-h-screen text-center px-4">
-      <h1 class="text-4xl font-bold mb-2">Alpen Budget</h1>
-      <p class="text-xl mb-6">Personal Expense Tracker<br>Offline HTML report generator</p>
 
-      <CSVUpload />
-    </section>
+  <body>
+    <div class="page-wrapper">
 
-    <!-- Carousel Section -->
-    <section id="carousel-section" class="min-h-screen px-4 py-12 hidden">
-      <h2 class="text-3xl font-semibold text-center mb-6">Your Reports</h2>
-      <GraphCarousel />
-    </section>
+      <!-- LANDING / PAGE 1 -->
+      <section
+        id="landing"
+        class="landing reveal"
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          text-align: center;
+          padding: 2rem;
+        "
+      >
+        <h1 class="title">Alpen Budget</h1>
 
-    <script type="module" src="/src/components/scroll.js"></script>
+        <p class="subtitle">
+          Personal Expense Tracker<br />
+          Offline HTML report generator
+        </p>
+
+        <!-- Buttons directly under subtitle -->
+        <ReportSection client:load />
+
+        <ScrollReveal />
+      </section>
+
+    </div>
   </body>
 </html>
