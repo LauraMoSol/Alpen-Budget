@@ -22,3 +22,14 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Ignore virtual environments
+backend/data_analysis/quarto-env/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Quarto outputs
+output/
+_site/
