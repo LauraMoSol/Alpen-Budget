@@ -1,3 +1,10 @@
+/* Input + User Action
+Responsibilities
+1. File selection
+2. “Generate Report” button
+3. Calls graphs
+*/
+
 export default function CSVUpload({ onReportGenerated }) {
   const handleGenerateReport = () => {
     const graphs = [

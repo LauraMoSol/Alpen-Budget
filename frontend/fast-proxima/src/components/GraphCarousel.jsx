@@ -1,3 +1,12 @@
+/* Responsive Graph Display
+Responsibilities
+1. Display graphs OR placeholder
+2.Responsive layout:
+2.1 Wraps on small screens
+2.2 Centers content
+2.3 Maintains proportions on resize/zoom
+*/
+
 export default function GraphCarousel({ graphs }) {
   return (
     <div
