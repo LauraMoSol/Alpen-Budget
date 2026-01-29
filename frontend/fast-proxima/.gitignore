@@ -31,5 +31,8 @@ __pycache__/
 *.pyc
 
 # Quarto outputs
+# Output files
+backend/sample_data/
+data/
 output/
-_site/
+
