@@ -1,0 +1,26 @@
+---
+title: "Budget Report"
+format: html
+execute:
+  echo: true
+  eval: true
+  python: true
+---
+
+
+```{python}
+# -------------------------------
+# Budget Report - CSV Display
+# -------------------------------
+
+import pandas as pd
+from pathlib import Path
+
+# Locate CSV safely relative to this file
+csv_path = Path.cwd().parent / "sample_data" / "zkb_sample_expenses_1.csv"
+
+# Load CSV
+df = pd.read_csv(csv_path)
+
+# Display first 10 rows in HTML
+df.head(10)
