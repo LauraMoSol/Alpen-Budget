@@ -36,3 +36,17 @@ backend/sample_data/
 data/
 output/
 
+# R / Quarto temp files
+*.RData
+*.Rhistory
+*.html
+*_files/
+
+# Quarto output / backend outputs
+backend/data_analysis/output/
+backend/data_analysis/quarto-env/
+
+# macOS files
+*.DS_Store
+
+

@@ -2,25 +2,81 @@
 title: "Budget Report"
 format: html
 execute:
-  echo: true
-  eval: true
-  python: true
+  echo: false       # hide code
+  eval: true        # actually run code
+jupyter:
+  kernel: ir        # R kernel
 ---
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+time_unit <- "month"  # options: "day", "month", "year"
 
-```{python}
-# -------------------------------
-# Budget Report - CSV Display
-# -------------------------------
+# Paths
+csv_path <- "/home/levolesialev/semester_project/Alpen-Budget/backend/sample_data/zkb_sample_expenses_1.csv"
+output_dir <- "/home/levolesialev/semester_project/Alpen-Budget/backend/data_analysis/output"
+if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
-import pandas as pd
-from pathlib import Path
+# -----------------------------
+# 1. Load Libraries
+# -----------------------------
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(scales) # for formatting dates
 
-# Locate CSV safely relative to this file
-csv_path = Path.cwd().parent / "sample_data" / "zkb_sample_expenses_1.csv"
+# -----------------------------
+# 2. Load CSV
+# -----------------------------
+df <- read_csv(csv_path, col_types = cols(Date = col_date(format = "%d.%m.%Y")))
 
-# Load CSV
-df = pd.read_csv(csv_path)
+# -----------------------------
+# 3. Prepare Data
+# -----------------------------
+df <- df %>%
+  mutate(Debit_CHF = coalesce(`Debit CHF`, 0))
 
-# Display first 10 rows in HTML
-df.head(10)
+# Group by selected time unit
+df_agg <- df %>%
+  mutate(
+    Time = case_when(
+      time_unit == "day"   ~ Date,
+      time_unit == "month" ~ floor_date(Date, unit = "month"),
+      time_unit == "year"  ~ floor_date(Date, unit = "year")
+    )
+  ) %>%
+  group_by(Time) %>%
+  summarise(Spending = sum(Debit_CHF), .groups = "drop") %>%
+  arrange(Time)
+
+# -----------------------------
+# 4. Generate Bar Chart
+# -----------------------------
+# Format x-axis labels depending on time_unit
+x_labels <- switch(time_unit,
+                   "day"   = date_format("%d.%m.%Y"),
+                   "month" = date_format("%b %Y"),
+                   "year"  = date_format("%Y"))
+
+p <- ggplot(df_agg, aes(x = Time, y = Spending)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = paste("Spending per", time_unit),
+    x = "Time",
+    y = "Debit (CHF)"
+  ) +
+  theme_minimal() +
+  scale_x_date(labels = x_labels) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Save plot as SVG
+svg_file <- file.path(output_dir, paste0("spending_per_", time_unit, ".svg"))
+ggsave(filename = svg_file, plot = p, width = 10, height = 6, device = "svg")
+
+cat("SVG saved to:", svg_file, "\n")
+
+# -----------------------------
+# 5. Preview Table
+# -----------------------------
+df_agg %>% slice_head(n = 10)
+```
