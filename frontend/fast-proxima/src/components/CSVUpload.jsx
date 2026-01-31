@@ -8,7 +8,18 @@ Responsibilities
 export default function CSVUpload({ onReportGenerated }) {
   const handleGenerateReport = () => {
     const graphs = [
-      { title: 'Example Graph', image: '/placeholder_graph.jpeg' }
+      {
+        title: 'Daily Spending',
+        image: '/reports/spending_per_day.svg',
+      },
+      {
+        title: 'Monthly Spending',
+        image: '/reports/spending_per_month.svg',
+      },
+      {
+        title: 'Yearly Spending',
+        image: '/reports/spending_per_year.svg',
+      },
     ];
     onReportGenerated(graphs);
   };
