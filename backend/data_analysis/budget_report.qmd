@@ -9,13 +9,12 @@ jupyter:
 ---
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
-time_unit <- "month"  # options: "day", "month", "year"
+time_unit <- "day"  # options: "day", "month", "year"
 
 # Paths
 csv_path <- "/home/levolesialev/semester_project/Alpen-Budget/backend/sample_data/zkb_sample_expenses_1.csv"
-output_dir <- "/home/levolesialev/semester_project/Alpen-Budget/backend/data_analysis/output"
-if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
-
+reports_dir <- "/home/levolesialev/semester_project/Alpen-Budget/frontend/fast-proxima/public/reports"
+if (!dir.exists(reports_dir)) dir.create(reports_dir, recursive = TRUE)
 # -----------------------------
 # 1. Load Libraries
 # -----------------------------
@@ -59,18 +58,40 @@ x_labels <- switch(time_unit,
                    "year"  = date_format("%Y"))
 
 p <- ggplot(df_agg, aes(x = Time, y = Spending)) +
-  geom_col(fill = "steelblue") +
+  geom_col(fill = "#3fa73f") +                        # green bars
   labs(
     title = paste("Spending per", time_unit),
     x = "Time",
     y = "Debit (CHF)"
   ) +
-  theme_minimal() +
   scale_x_date(labels = x_labels) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_minimal(base_size = 14) +
+  theme(
+    # Card-matching dark background
+    panel.background = element_rect(fill = "#1f2937", color = NA),
+    plot.background  = element_rect(fill = "#1f2937", color = NA),
+    
+    # Grid lines subtle
+    panel.grid.major = element_line(color = "#2e3a4b", size = 0.5),
+    panel.grid.minor = element_line(color = "#2e3a4b", size = 0.25),
+    
+    # Axis text and title in white
+    axis.text  = element_text(color = "white"),
+    axis.title = element_text(color = "white", face = "bold"),
+    
+    # Rotate X labels nicely
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    
+    # Plot title styling
+    plot.title = element_text(color = "white", face = "bold", size = 16, hjust = 0.5),
+    
+    # Remove extra spacing around plot
+    plot.margin = margin(10, 10, 10, 10)
+  )
+
 
 # Save plot as SVG
-svg_file <- file.path(output_dir, paste0("spending_per_", time_unit, ".svg"))
+svg_file <- file.path(reports_dir, paste0("spending_per_", time_unit, ".svg"))
 ggsave(filename = svg_file, plot = p, width = 10, height = 6, device = "svg")
 
 cat("SVG saved to:", svg_file, "\n")
