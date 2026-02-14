@@ -1,4 +1,4 @@
-# Budget Report Script in (R)
+# Budget Report QMD Script in (R)
 
 # 1. Settings
 time_unit <- "day"  # options: "day", "month", "year"
